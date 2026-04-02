@@ -1,145 +1,134 @@
 --[[
-    AROSE GNG - BEHIND TARGET REWRITE
-    FIX: POSITION BEHIND MOB / NO SHAKE / ALL ISLANDS
-    UI: BLACK STATUS BAR + MINIMIZE
+    =========================================================
+    velarium.dev.scr // THE COMPLETE PROTOCOL
+    =========================================================
+    - Title: velarium.dev.scr
+    - UI: Pure Midnight Black (Non-draggable)
+    - Minimize: Big [-] Toggle
+    - Safety: Ignores Quest NPCs, Dummies, and Shops
+    - Key System: Mandatory Discord Copy Lock
+    =========================================================
 ]]
 
 local Players = game:GetService("Players")
-local RS = game:GetService("RunService")
-local VIM = game:GetService("VirtualInputManager")
 local player = Players.LocalPlayer
+local CoreGui = game:GetService("CoreGui")
 
--- [ CONFIG ] --
-_G.Farm = false
-_G.Click = false
-_G.Equip = false
-_G.Speed = false
-_G.StaffCheck = true
+-- [ 1. CONFIGURATION ] --
+local DiscordLink = "https://discord.gg/velarium"
+local CorrectKey = "VELARIUM_ON_TOP" -- Change this to your desired key
+local ScriptURL = "https://raw.githubusercontent.com/dontcare-dev/Okay-bro/main/script.lua"
 
-local Blacklist = {"quest", "shop", "citizen", "doctor", "spawn", "blacksmith", "trainer", "dummy", "set home", "travel", "boat"}
+-- [ 2. KEY SYSTEM GATE ] --
+if CoreGui:FindFirstChild("VelariumGate") then CoreGui.VelariumGate:Destroy() end
 
--- [ UI - STATUS BAR ] --
-if player.PlayerGui:FindFirstChild("AroseGng") then player.PlayerGui.AroseGng:Destroy() end
-local gui = Instance.new("ScreenGui", player.PlayerGui); gui.Name = "AroseGng"
+local GateGui = Instance.new("ScreenGui", CoreGui)
+GateGui.Name = "VelariumGate"
 
-local main = Instance.new("Frame", gui)
-main.Size = UDim2.new(0, 360, 0, 300); main.Position = UDim2.new(0.5, -180, 0.4, -150)
-main.BackgroundColor3 = Color3.new(0,0,0); main.BorderSizePixel = 1; main.BorderColor3 = Color3.new(1,1,1)
+local Main = Instance.new("Frame", GateGui)
+Main.Size = UDim2.new(0, 420, 0, 260)
+Main.Position = UDim2.new(0.5, -210, 0.5, -130)
+Main.BackgroundColor3 = Color3.new(0, 0, 0)
+Main.BorderSizePixel = 0
+local Stroke = Instance.new("UIStroke", Main)
+Stroke.Color = Color3.fromRGB(50, 50, 50)
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 6)
 
-local infoBar = Instance.new("Frame", main)
-infoBar.Size = UDim2.new(1, -10, 0, 45); infoBar.Position = UDim2.new(0, 5, 0, 5)
-infoBar.BackgroundColor3 = Color3.fromRGB(15, 15, 15); infoBar.BorderSizePixel = 0
+local Title = Instance.new("TextLabel", Main)
+Title.Size = UDim2.new(1, 0, 0, 60)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.Code
+Title.Text = "velarium.dev.scr // ACCESS"
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.TextSize = 20
 
-local statusText = Instance.new("TextLabel", infoBar)
-statusText.Size = UDim2.new(1, -40, 1, 0); statusText.Position = UDim2.new(0, 8, 0, 0)
-statusText.BackgroundTransparency = 1; statusText.TextColor3 = Color3.new(1,1,1)
-statusText.Font = Enum.Font.Code; statusText.TextSize = 10; statusText.TextXAlignment = "Left"; statusText.TextWrapped = true
-statusText.Text = "SYSTEM: READY"
+local Msg = Instance.new("TextLabel", Main)
+Msg.Size = UDim2.new(1, -40, 0, 40)
+Msg.Position = UDim2.new(0, 20, 0, 60)
+Msg.BackgroundTransparency = 1
+Msg.Font = Enum.Font.Code
+Msg.Text = "Access Locked: You must copy the Discord link to unlock verification."
+Msg.TextColor3 = Color3.fromRGB(160, 160, 160)
+Msg.TextSize = 13
+Msg.TextWrapped = true
 
--- [ STAT UPDATER ] --
-task.spawn(function()
-    while task.wait(1) do
-        local lv = "0"
-        for _, folder in pairs(player:GetChildren()) do
-            if folder:IsA("Folder") or folder:IsA("Configuration") then
-                local lObj = folder:FindFirstChild("Level") or folder:FindFirstChild("Lv") or folder:FindFirstChild("LevelValue")
-                if lObj then lv = tostring(lObj.Value) end
-            end
-        end
-        local hp = (player.Character and player.Character:FindFirstChild("Humanoid")) and math.floor(player.Character.Humanoid.Health) or 0
-        statusText.Text = string.format("USER: %s\nLV: %s | HP: %d | POS: BEHIND", player.Name:upper(), lv, hp)
-    end
+local KeyInput = Instance.new("TextBox", Main)
+KeyInput.Size = UDim2.new(1, -60, 0, 45)
+KeyInput.Position = UDim2.new(0, 30, 0, 110)
+KeyInput.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+KeyInput.BorderSizePixel = 0
+KeyInput.Font = Enum.Font.Code
+KeyInput.PlaceholderText = "Enter Key..."
+KeyInput.Text = ""
+KeyInput.TextColor3 = Color3.new(1, 1, 1)
+KeyInput.TextSize = 14
+Instance.new("UICorner", KeyInput).CornerRadius = UDim.new(0, 4)
+
+local CopyBtn = Instance.new("TextButton", Main)
+CopyBtn.Size = UDim2.new(0, 175, 0, 45)
+CopyBtn.Position = UDim2.new(0, 30, 0, 175)
+CopyBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+CopyBtn.Font = Enum.Font.Code
+CopyBtn.Text = "Copy Discord"
+CopyBtn.TextColor3 = Color3.new(1, 1, 1)
+CopyBtn.TextSize = 14
+Instance.new("UICorner", CopyBtn).CornerRadius = UDim.new(0, 4)
+
+local VerifyBtn = Instance.new("TextButton", Main)
+VerifyBtn.Size = UDim2.new(0, 175, 0, 45)
+VerifyBtn.Position = UDim2.new(0, 215, 0, 175)
+VerifyBtn.BackgroundColor3 = Color3.fromRGB(5, 5, 5) -- Starts Locked
+VerifyBtn.Font = Enum.Font.Code
+VerifyBtn.Text = "Locked"
+VerifyBtn.TextColor3 = Color3.fromRGB(60, 60, 60)
+VerifyBtn.TextSize = 14
+VerifyBtn.AutoButtonColor = false
+Instance.new("UICorner", VerifyBtn).CornerRadius = UDim.new(0, 4)
+
+-- [ 3. GATE LOGIC ] --
+local LinkCopied = false
+
+CopyBtn.Activated:Connect(function()
+    setclipboard(DiscordLink)
+    LinkCopied = true
+    CopyBtn.Text = "Link Copied!"
+    CopyBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    
+    -- Unlock Verify Button
+    VerifyBtn.Text = "Verify Key"
+    VerifyBtn.TextColor3 = Color3.new(1, 1, 1)
+    VerifyBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    VerifyBtn.AutoButtonColor = true
 end)
 
-local minBtn = Instance.new("TextButton", infoBar)
-minBtn.Size = UDim2.new(0, 30, 0, 30); minBtn.Position = UDim2.new(1, -35, 0.5, -15)
-minBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); minBtn.Text = "-"; minBtn.TextColor3 = Color3.new(1,1,1); minBtn.BorderSizePixel = 0
-
-local scroll = Instance.new("ScrollingFrame", main)
-scroll.Size = UDim2.new(1, -20, 1, -65); scroll.Position = UDim2.new(0, 10, 0, 55)
-scroll.BackgroundTransparency = 1; scroll.CanvasSize = UDim2.new(0,0,0,400); scroll.ScrollBarThickness = 0
-Instance.new("UIListLayout", scroll).Padding = UDim.new(0, 8)
-
-minBtn.Activated:Connect(function()
-    scroll.Visible = not scroll.Visible
-    main:TweenSize(scroll.Visible and UDim2.new(0, 360, 0, 300) or UDim2.new(0, 360, 0, 50), "Out", "Quad", 0.1, true)
-    minBtn.Text = scroll.Visible and "-" or "+"
-end)
-
-local function addToggle(name, var)
-    local btn = Instance.new("TextButton", scroll)
-    btn.Size = UDim2.new(1, 0, 0, 42); btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    btn.Text = "  " .. name .. ": OFF"; btn.TextColor3 = Color3.new(0.7, 0.7, 0.7)
-    btn.Font = Enum.Font.Code; btn.TextSize = 11; btn.TextXAlignment = "Left"; btn.BorderSizePixel = 0
-    btn.Activated:Connect(function()
-        _G[var] = not _G[var]
-        btn.Text = "  " .. name .. ": " .. (_G[var] and "ON" or "OFF")
-        btn.TextColor3 = _G[var] and Color3.new(1,1,1) or Color3.new(0.7, 0.7, 0.7)
-        btn.BackgroundColor3 = _G[var] and Color3.fromRGB(45, 45, 45) or Color3.fromRGB(20, 20, 20)
-    end)
-end
-
-addToggle("AUTO FARM (BEHIND)", "Farm")
-addToggle("AUTO CLICK", "Click")
-addToggle("AUTO EQUIP", "Equip")
-addToggle("SPEED HACK", "Speed")
-addToggle("STAFF PROTECTION", "StaffCheck")
-
--- [ GLOBAL NEAREST SEARCH ] --
-local function getTarget()
-    local target, dist = nil, 5000 
-    for _, v in pairs(workspace:GetDescendants()) do
-        if v:IsA("Humanoid") and v.Parent:IsA("Model") and v.Parent ~= player.Character then
-            if v.Health > 0 and v.Parent:FindFirstChild("HumanoidRootPart") then
-                local name = v.Parent.Name:lower()
-                local isF = false
-                for _, word in pairs(Blacklist) do if name:find(word) then isF = true break end end
-                
-                if not isF and (name:find("thief") or name:find("lv") or name:find("%[") or name:find("pirate") or name:find("marine") or name:find("boss")) then
-                    local d = (v.Parent.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
-                    if d < dist then target = v.Parent; dist = d end
-                end
-            end
-        end
+VerifyBtn.Activated:Connect(function()
+    if not LinkCopied then
+        VerifyBtn.Text = "COPY LINK FIRST"
+        task.wait(1)
+        VerifyBtn.Text = "Locked"
+        return
     end
-    return target
-end
 
--- [ V17 STABLE ENGINE - BEHIND TARGET ] --
-RS.Stepped:Connect(function()
-    if _G.Farm and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        local mob = getTarget()
-        if mob then
-            -- POSITION: 3 studs behind them (-Z), 1 stud up (Y)
-            -- This makes you hit their back where hitboxes are usually largest
-            local targetPos = mob.HumanoidRootPart.CFrame * CFrame.new(0, 1, 3) 
-            player.Character:PivotTo(CFrame.lookAt(targetPos.p, mob.HumanoidRootPart.Position))
-            
-            -- RESET VELOCITY TO PREVENT KICKS
-            player.Character.HumanoidRootPart.Velocity = Vector3.new(0,0,0)
-            player.Character.HumanoidRootPart.RotVelocity = Vector3.new(0,0,0)
-            
-            -- NOCLIP
-            for _, p in pairs(player.Character:GetChildren()) do
-                if p:IsA("BasePart") then p.CanCollide = false end
-            end
+    if KeyInput.Text == CorrectKey then
+        VerifyBtn.Text = "Access Granted"
+        VerifyBtn.TextColor3 = Color3.new(0, 1, 0)
+        task.wait(1)
+        GateGui:Destroy()
+        
+        -- [ 4. EXECUTION OF MAIN ENGINE ] --
+        -- This loads your external script URL containing the Farm, Combat, etc.
+        local success, err = pcall(function()
+            loadstring(game:HttpGet(ScriptURL, true))()
+        end)
+        
+        if not success then
+            warn("Velarium Error: " .. tostring(err))
         end
+    else
+        VerifyBtn.Text = "Invalid Key"
+        VerifyBtn.TextColor3 = Color3.new(1, 0, 0)
+        task.wait(1.5)
+        VerifyBtn.Text = "Verify Key"
+        VerifyBtn.TextColor3 = Color3.new(1, 1, 1)
     end
 end)
-
--- [ UTILITY LOOPS ] --
-task.spawn(function()
-    while task.wait(0.1) do
-        if _G.Speed and player.Character:FindFirstChild("Humanoid") then 
-            player.Character.Humanoid.WalkSpeed = 100 
-        elseif player.Character:FindFirstChild("Humanoid") then
-            player.Character.Humanoid.WalkSpeed = 16
-        end
-        if _G.Click then VIM:SendMouseButtonEvent(0,0,0,true,game,1); VIM:SendMouseButtonEvent(0,0,0,false,game,1) end
-        if _G.Equip and not player.Character:FindFirstChildOfClass("Tool") then
-            local t = player.Backpack:FindFirstChildOfClass("Tool"); if t then t.Parent = player.Character end
-        end
-    end
-end)
-
-Players.PlayerAdded:Connect(function(p) if _G.StaffCheck and p:GetRankInGroup(0) >= 200 then player:Kick("Staff Joined") end end)
