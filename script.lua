@@ -1,4 +1,4 @@
--- crimson | BloxStrike (Bloom theme)
+-- crimson | BloxStrike 
 local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/twistedk1d/BloxStrike/refs/heads/main/Source/UI/source.lua"))()
 
 --// Window creation
@@ -40,7 +40,7 @@ local Tab_Skins   = Window:CreateTab("Skins", "swords")
 local Tab_Visuals = Window:CreateTab("Visuals", "eye")
 
 --// ==========================================
---// SHARED LOGIC (TEAM CHECK)
+--// SHARED LOGIC (team check shit)
 --// ==========================================
 local function getTFolder() return CharactersFolder:FindFirstChild("Terrorists") end
 local function getCTFolder() return CharactersFolder:FindFirstChild("Counter-Terrorists") end
@@ -59,7 +59,7 @@ local function getEnemyFolder()
 end
 
 --// ==========================================
---// AIMBOT & FOV LOGIC
+--// AIMBOT & FOV Shi
 --// ==========================================
 local AimbotEnabled = false
 local ShowFOV = false
@@ -172,7 +172,7 @@ Tab_Combat:CreateSlider({
 })
 
 --// ==========================================
---// TRIGGERBOT LOGIC
+--// TRIGGERBOT (Auto Shoot type shi)
 --// ==========================================
 local TriggerBotEnabled = false
 local TriggerBotDelay = 0
@@ -229,7 +229,7 @@ task.spawn(function()
 end)
 
 --// ==========================================
---// SIMPLE HITBOX LOGIC (NO HOOKS)
+--// hit logic
 --// ==========================================
 local HitboxEnabled = false
 local HitboxSize = 3
@@ -289,7 +289,7 @@ task.spawn(function()
 end)
 
 --// ==========================================
---// BHOP (BUNNY HOP) LOGIC
+--// BHOP logic
 --// ==========================================
 local BhopEnabled = false
 
@@ -315,7 +315,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 --// ==========================================
---// SKINS TAB LOGIC
+--// SKINS CHANGER SHIT (fun)
 --// ==========================================
 local scriptRunning = false
 local selectedKnife = "Butterfly Knife"
